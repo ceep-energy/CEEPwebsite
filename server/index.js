@@ -36,6 +36,7 @@ const ensureDataStore = async () => {
       'email',
       'mobile',
       'organization',
+      'inquiry',
       'requestedFile',
       'requestedName',
       'createdAt'
@@ -100,7 +101,7 @@ app.get("/api/inquiries", async (_req, res) => {
 });
 
 app.post("/api/registrations", async (req, res) => {
-  const { name, email, mobile, organization, requestedFile, requestedName } = req.body || {};
+  const { name, email, mobile, organization, inquiry, requestedFile, requestedName } = req.body || {};
 
   console.log('Received /api/registrations from', req.ip, 'origin:', req.headers.origin || '-', 'body keys:', Object.keys(req.body || {}));
 
@@ -119,6 +120,7 @@ app.post("/api/registrations", async (req, res) => {
       email: String(email).trim().toLowerCase(),
       mobile: String(mobile).trim(),
       organization: String(organization).trim(),
+      inquiry: String(inquiry || '').trim(),
       requestedFile: String(requestedFile).trim(),
       requestedName: String(requestedName || requestedFile).trim(),
       createdAt: new Date().toISOString(),
@@ -135,6 +137,7 @@ app.post("/api/registrations", async (req, res) => {
         escapeCsv(newRegistration.email),
         escapeCsv(newRegistration.mobile),
         escapeCsv(newRegistration.organization),
+        escapeCsv(newRegistration.inquiry),
         escapeCsv(newRegistration.requestedFile),
         escapeCsv(newRegistration.requestedName),
         newRegistration.createdAt

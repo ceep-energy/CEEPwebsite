@@ -24,7 +24,8 @@ const Register = () => {
         name: '',
         email: '',
         mobile: '',
-        organization: ''
+        organization: '',
+        inquiry: ''
     });
     const [status, setStatus] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -143,6 +144,13 @@ const Register = () => {
                         onChange={handleChange}
                         placeholder="Organization"
                         required
+                    />
+                    <textarea
+                        name="inquiry"
+                        value={formData.inquiry}
+                        onChange={handleChange}
+                        placeholder="Detailed Inquiry (optional)"
+                        rows={4}
                     />
 
                     <button type="submit" disabled={status === 'sending' || !requestedFile}>
