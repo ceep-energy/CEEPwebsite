@@ -36,13 +36,38 @@ const Footer = () => {
         e.preventDefault();
         setStatus('sending');
         const apiBaseUrl = resolveApiBaseUrl();
+        // helper to POST to Netlify forms endpoint (URL-encoded)
+        const postToNetlify = async (data) => {
+            try {
+                const body = new URLSearchParams();
+                body.append('form-name', 'contact');
+                body.append('name', data.name || '');
+                body.append('mobile', data.mobile || '');
+                body.append('email', data.email || '');
+                body.append('message', data.message || '');
+                body.append('bot-field', '');
+
+                await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString()
+                });
+            } catch (nfErr) {
+                // non-fatal — Netlify may not be reachable in local dev
+                console.warn('Netlify form POST failed:', nfErr);
+            }
+        };
 
         try {
+            // Attempt server API submission first
             const response = await fetch(`${apiBaseUrl}/api/inquiries`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
+
+            // Also submit to Netlify (do not block on it)
+            postToNetlify(formData);
 
             if (!response.ok) {
                 throw new Error('Failed to submit inquiry');
@@ -53,6 +78,8 @@ const Footer = () => {
             setTimeout(() => setStatus(''), 6000);
         } catch (error) {
             console.error('Inquiry submit error:', error);
+            // Try Netlify submission as a fallback / redundancy
+            await postToNetlify(formData);
             try {
                 const newInquiry = {
                     id: Date.now().toString(),
@@ -79,9 +106,16 @@ const Footer = () => {
                     <div className="footer-section footer-section-left">
                         <h3>Quick Inquiry</h3>
                         <form
+                            name="contact"
+                            method="POST"
+                            data-netlify="true"
+                            netlify-honeypot="bot-field"
                             className="footer-form-minimal"
                             onSubmit={handleSubmit}
                         >
+                            {/* Netlify hidden inputs for static detection and JS POST */}
+                            <input type="hidden" name="form-name" value="contact" />
+                            <input type="hidden" name="bot-field" aria-hidden="true" />
                             <input
                                 type="text"
                                 name="name"
