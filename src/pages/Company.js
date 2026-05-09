@@ -17,7 +17,7 @@ const Company = () => {
                 bio: 'A Mechanical Engineer with a postgraduate specialization in Energy Management, bringing over three decades of experience in the fields of energy auditing, conservation, and performance optimization across industrial sectors. As an Accredited Energy Auditor certified by the Bureau of Energy Efficiency (BEE), he has led and executed more than 100 detailed energy audits, delivering measurable improvements in energy efficiency and operational performance. He is also a Lead Auditor for ISO 50001 Energy Management Systems (EnMS), with extensive expertise in implementing structured energy management frameworks aligned with national and international standards. In addition to his consulting work, he is an accomplished professional trainer, actively contributing to capacity building and knowledge development in energy efficiency and compliance under programs such as CEEP and related initiatives.',
                 image: '/images/team/nagesh.jpg',
                 email: 'nageshkumar@ceepenergy.in',
-                linkedin: '#'
+                linkedin: 'https://www.linkedin.com/in/j-nagesh-kumar-b6a05755/'
             },
             {
                 _id: 'team-2',
@@ -26,7 +26,7 @@ const Company = () => {
                 bio: 'A Chemical Engineer specializing in process engineering and industrial energy optimization, with a focused and evolving expertise in energy audits, utility systems, and ISO 50001 Energy Management Systems (EnMS). Positioned at an intermediate level of professional experience, he combines a strong academic foundation with practical exposure to industrial energy assessment and performance improvement initiatives. In addition to field-level audit activities, he brings a growing proficiency in computational techniques relevant to energy analysis. This includes the use of process simulation tools, data-driven modeling, and analytical methods to assess system performance, estimate savings potential, and support decision-making. His ability to integrate process engineering principles with computational analysis enables a balanced approach to identifying practical and technically sound energy efficiency measures.',
                 image: '/images/team/sakthi.jpeg',
                 email: 'sakthiaadharshazhagar@ceepenergy.in',
-                linkedin: '#'
+                linkedin: 'https://www.linkedin.com/in/sakthiaadharshazhagar/'
             }
         ];
         setTeamMembers(members);

@@ -139,10 +139,10 @@ const Footer = () => {
                             <a href="https://www.linkedin.com/company/ceep-audit/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                                 <FaLinkedin />
                             </a>
-                            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                            <a href="https://youtube.com/@tallkumar?si=idFMBzDiMdbmlPYB" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                                 <FaYoutube />
                             </a>
-                            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                            <a href="https://www.instagram.com/ceep.consultancy" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                                 <FaInstagram />
                             </a>
                         </div>
