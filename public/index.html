@@ -26,11 +26,21 @@
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!-- Hidden form for Netlify automated detection -->
+    <!-- Hidden forms for Netlify automated detection -->
     <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
         <input type="text" name="name" />
         <input type="tel" name="mobile" />
         <input type="email" name="email" />
+        <textarea name="message"></textarea>
+    </form>
+    <form name="registration" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="tel" name="mobile" />
+        <input type="text" name="organization" />
+        <textarea name="inquiry"></textarea>
+        <input type="hidden" name="requestedFile" />
+        <input type="hidden" name="requestedName" />
     </form>
 </body>
 
