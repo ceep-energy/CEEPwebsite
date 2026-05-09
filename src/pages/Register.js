@@ -2,22 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import './Register.css';
 
-const resolveApiBaseUrl = () => {
-    if (process.env.REACT_APP_API_BASE_URL) {
-        return process.env.REACT_APP_API_BASE_URL;
-    }
-
-    if (typeof window !== 'undefined') {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:4000';
-        }
-
-        return window.location.origin;
-    }
-
-    return 'http://localhost:4000';
-};
-
 const Register = () => {
     const [searchParams] = useSearchParams();
     const [formData, setFormData] = useState({
@@ -32,7 +16,6 @@ const Register = () => {
 
     const requestedFile = searchParams.get('file') || '';
     const requestedName = searchParams.get('name') || 'selected document';
-    const apiBaseUrl = resolveApiBaseUrl();
 
     const downloadUrl = useMemo(() => {
         if (!requestedFile) return '';
@@ -52,32 +35,38 @@ const Register = () => {
         }
 
         setStatus('sending');
-        try {
-            const response = await fetch(`${apiBaseUrl}/api/registrations`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    requestedFile,
-                    requestedName
-                })
-            });
+        
+        // Submit to Netlify forms
+        const postToNetlify = async (data) => {
+            try {
+                const body = new URLSearchParams();
+                body.append('form-name', 'registration');
+                body.append('name', data.name || '');
+                body.append('email', data.email || '');
+                body.append('mobile', data.mobile || '');
+                body.append('organization', data.organization || '');
+                body.append('inquiry', data.inquiry || '');
+                body.append('requestedFile', requestedFile || '');
+                body.append('requestedName', requestedName || '');
+                body.append('bot-field', '');
 
-            let body = null;
-            try { body = await response.json(); } catch (e) { /* ignore */ }
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString()
+                });
 
-            if (!response.ok) {
-                const msg = (body && body.message) || `status ${response.status}`;
-                console.error('Registration failed:', msg, body);
-                setErrorMessage(String(msg));
-                setStatus('error');
-                return;
+                return response.ok;
+            } catch (nfErr) {
+                console.warn('Netlify form POST failed:', nfErr);
+                return false;
             }
+        };
 
-            setStatus('success');
-            window.location.assign(downloadUrl);
-        } catch (error) {
-            console.error('Registration error:', error);
+        try {
+            const netlifySuccess = await postToNetlify(formData);
+            
+            // Also save locally as redundancy
             try {
                 const localItem = {
                     id: Date.now().toString(),
@@ -85,18 +74,20 @@ const Register = () => {
                     requestedFile,
                     requestedName,
                     createdAt: new Date().toISOString(),
-                    source: 'local-fallback'
+                    source: netlifySuccess ? 'netlify' : 'local-fallback'
                 };
                 const existing = JSON.parse(localStorage.getItem('ceep-registrations') || '[]');
                 localStorage.setItem('ceep-registrations', JSON.stringify([...existing, localItem]));
-
-                setStatus('saved-local');
-                window.location.assign(downloadUrl);
             } catch (storageError) {
-                console.error('Local fallback failed:', storageError);
-                setErrorMessage(storageError.message || String(storageError));
-                setStatus('error');
+                console.error('Local storage save failed:', storageError);
             }
+
+            setStatus('success');
+            window.location.assign(downloadUrl);
+        } catch (error) {
+            console.error('Registration error:', error);
+            setErrorMessage('Could not complete registration. Please try again.');
+            setStatus('error');
         }
     };
 
@@ -112,7 +103,17 @@ const Register = () => {
                     <p className="register-error">No document selected. Please return to Services and choose a PDF.</p>
                 )}
 
-                <form onSubmit={handleSubmit} className="register-form">
+                <form 
+                    name="registration"
+                    method="POST"
+                    data-netlify="true"
+                    netlify-honeypot="bot-field"
+                    onSubmit={handleSubmit} 
+                    className="register-form"
+                >
+                    {/* Netlify hidden inputs for static detection and JS POST */}
+                    <input type="hidden" name="form-name" value="registration" />
+                    <input type="hidden" name="bot-field" aria-hidden="true" />
                     <input
                         type="text"
                         name="name"
