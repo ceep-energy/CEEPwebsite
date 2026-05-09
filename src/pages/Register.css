@@ -33,13 +33,21 @@
     gap: 0.8rem;
 }
 
-.register-form input {
+.register-form input,
+.register-form textarea {
     width: 100%;
     padding: 0.8rem 0.95rem;
     border-radius: 10px;
     border: 1px solid var(--bg-placeholder);
     background: var(--bg-primary);
     color: var(--text-primary);
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.register-form textarea {
+    resize: vertical;
+    font-size: 0.95rem;
 }
 
 .register-form button {
