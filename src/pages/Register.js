@@ -63,32 +63,15 @@ const Register = () => {
             }
         };
 
-        try {
-            const netlifySuccess = await postToNetlify(formData);
-            
-            // Also save locally as redundancy
-            try {
-                const localItem = {
-                    id: Date.now().toString(),
-                    ...formData,
-                    requestedFile,
-                    requestedName,
-                    createdAt: new Date().toISOString(),
-                    source: netlifySuccess ? 'netlify' : 'local-fallback'
-                };
-                const existing = JSON.parse(localStorage.getItem('ceep-registrations') || '[]');
-                localStorage.setItem('ceep-registrations', JSON.stringify([...existing, localItem]));
-            } catch (storageError) {
-                console.error('Local storage save failed:', storageError);
-            }
-
-            setStatus('success');
-            window.location.assign(downloadUrl);
-        } catch (error) {
-            console.error('Registration error:', error);
-            setErrorMessage('Could not complete registration. Please try again.');
+        const netlifySuccess = await postToNetlify(formData);
+        if (!netlifySuccess) {
+            setErrorMessage('We could not record your registration. Please try again, or email admin@ceepenergy.in.');
             setStatus('error');
+            return;
         }
+
+        setStatus('success');
+        window.location.assign(downloadUrl);
     };
 
     return (
@@ -161,9 +144,6 @@ const Register = () => {
 
                 {status === 'success' && (
                     <p className="register-success">Registration saved. Your download has started.</p>
-                )}
-                {status === 'saved-local' && (
-                    <p className="register-success">Server is unavailable, so your registration was saved locally in this browser and the download has started.</p>
                 )}
                 {status === 'error' && (
                     <p className="register-error">Could not complete registration. {errorMessage ? errorMessage : 'Please try again.'}</p>
