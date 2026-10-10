@@ -2,22 +2,6 @@ import React, { useState } from 'react';
 import { FaLinkedin, FaYoutube, FaInstagram } from 'react-icons/fa';
 import './Footer.css';
 
-const resolveApiBaseUrl = () => {
-    if (process.env.REACT_APP_API_BASE_URL) {
-        return process.env.REACT_APP_API_BASE_URL;
-    }
-
-    if (typeof window !== 'undefined') {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:4000';
-        }
-
-        return window.location.origin;
-    }
-
-    return 'http://localhost:4000';
-};
-
 const Footer = () => {
     const [formData, setFormData] = useState({
         name: '',
@@ -35,42 +19,29 @@ const Footer = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setStatus('sending');
-        const apiBaseUrl = resolveApiBaseUrl();
-        // helper to POST to Netlify forms endpoint (URL-encoded)
-        const postToNetlify = async (data) => {
-            try {
-                const body = new URLSearchParams();
-                body.append('form-name', 'contact');
-                body.append('name', data.name || '');
-                body.append('mobile', data.mobile || '');
-                body.append('email', data.email || '');
-                body.append('message', data.message || '');
-                body.append('bot-field', '');
 
-                await fetch('/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: body.toString()
-                });
-            } catch (nfErr) {
-                // non-fatal — Netlify may not be reachable in local dev
-                console.warn('Netlify form POST failed:', nfErr);
-            }
-        };
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
 
         try {
-            // Attempt server API submission first
-            const response = await fetch(`${apiBaseUrl}/api/inquiries`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+            const body = new URLSearchParams({
+                'form-name': 'contact',
+                name: formData.name,
+                mobile: formData.mobile,
+                email: formData.email,
+                message: formData.message,
+                'bot-field': ''
             });
 
-            // Also submit to Netlify (do not block on it)
-            postToNetlify(formData);
+            const response = await fetch('/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString(),
+                signal: controller.signal
+            });
 
             if (!response.ok) {
-                throw new Error('Failed to submit inquiry');
+                throw new Error(`Form submission failed with status ${response.status}`);
             }
 
             setStatus('success');
@@ -78,24 +49,9 @@ const Footer = () => {
             setTimeout(() => setStatus(''), 6000);
         } catch (error) {
             console.error('Inquiry submit error:', error);
-            // Try Netlify submission as a fallback / redundancy
-            await postToNetlify(formData);
-            try {
-                const newInquiry = {
-                    id: Date.now().toString(),
-                    ...formData,
-                    createdAt: new Date().toISOString(),
-                    source: 'local-fallback'
-                };
-                const existing = JSON.parse(localStorage.getItem('ceep-inquiries') || '[]');
-                localStorage.setItem('ceep-inquiries', JSON.stringify([...existing, newInquiry]));
-                setStatus('saved-local');
-                setFormData({ name: '', mobile: '', email: '', message: '' });
-                setTimeout(() => setStatus(''), 6000);
-            } catch (storageError) {
-                console.error('Inquiry local fallback failed:', storageError);
-                setStatus('error');
-            }
+            setStatus('error');
+        } finally {
+            clearTimeout(timer);
         }
     };
 
@@ -158,8 +114,7 @@ const Footer = () => {
                                 {status === 'sending' ? 'Sending...' : 'Send Request'}
                             </button>
                             {status === 'success' && <p className="form-status success">Sent successfully! We will contact you soon.</p>}
-                            {status === 'saved-local' && <p className="form-status success">Server is unavailable now. Inquiry saved locally in this browser and we will follow up once synced.</p>}
-                            {status === 'error' && <p className="form-status error">Something went wrong. Please try again.</p>}
+                            {status === 'error' && <p className="form-status error">We could not send your request. Please try again, or email admin@ceepenergy.in or call 9444882553.</p>}
                         </form>
                     </div>
 

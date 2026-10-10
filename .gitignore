@@ -32,3 +32,7 @@ Thumbs.db
 # Local inquiry storage
 server/data/inquiries.json
 server/data/registrations.json
+
+# Lead data must never be committed
+server/data/
+*.csv
